@@ -18,9 +18,16 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
+        var method = httpContext.Request.Method;
+        var path = httpContext.Request.Path.Value ?? "/";
+
         if (exception is TaskNotFoundException notFound)
         {
-            _logger.LogWarning("Tarefa {TaskId} não encontrada", notFound.TaskId);
+            _logger.LogWarning(
+                "404 {Method} {Path} — tarefa {TaskId} não encontrada",
+                method,
+                path,
+                notFound.TaskId);
             httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
             await httpContext.Response.WriteAsJsonAsync(
                 new ProblemDetails
@@ -33,7 +40,11 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             return true;
         }
 
-        _logger.LogError(exception, "Falha não tratada na requisição");
+        _logger.LogError(
+            exception,
+            "500 {Method} {Path} — falha não tratada",
+            method,
+            path);
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
         await httpContext.Response.WriteAsJsonAsync(
             new ProblemDetails

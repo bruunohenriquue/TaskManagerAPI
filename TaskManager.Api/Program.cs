@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using TaskManager.Api.Handlers;
 using TaskManager.Application;
@@ -10,6 +11,20 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var log = context.HttpContext.RequestServices
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger("Api.Validation");
+            log.LogWarning(
+                "400 {Method} {Path} — modelo inválido",
+                context.HttpContext.Request.Method,
+                context.HttpContext.Request.Path);
+            return new BadRequestObjectResult(new ValidationProblemDetails(context.ModelState));
+        };
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
