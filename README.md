@@ -48,7 +48,7 @@ Validação inválida retorna **400** (detalhes no corpo padrão do ASP.NET Core
 
 ## Logging
 
-Com a API a correr no terminal (ou outro sink configurado), aparecem registos em situações de erro:
+Com a API rodando no terminal (ou outro sink configurado), aparecem registos em situações de erro:
 
 - **400** (modelo inválido): categoria `Api.Validation`, nível **Warning**, com método HTTP e caminho.
 - **404** (tarefa inexistente): `GlobalExceptionHandler`, **Warning**, com método, caminho e id.
